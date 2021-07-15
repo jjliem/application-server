@@ -11,26 +11,56 @@ const port = 3000;
 //A: path.join takes absolute path of current executing file and adds public to it so express can find our static files
 app.use(express.static(path.join(__dirname, 'public')))
 
-//will add routes
-app.get("/menu", async (request, response) => {
-    let randInt = Math.ceil(Math.random()*3);
-    let randMenu = await Menu.findByPk(randInt)
-    response.json(randMenu)
+//get all restaurants
+app.get("/restaurants", async (req, res) => {
+    let restaurants = await Restaurant.findAll()
+    res.json({ restaurants })
 })
 
-//will add routes
-app.get("/restaurant", async (request, response) => {
-    let randInt = Math.ceil(Math.random()*3);
-    let randResto = await Restaurant.findByPk(randInt)
-    response.json(randResto)
+//get all menus
+app.get("/menus", async (req, res) => {
+    let menus = await Menu.findAll()
+    res.json({ menus })
 })
 
-//return menu and items
-app.get("/menuitems", async (request, response) => {
+//get all items
+app.get("/items", async (req, res) => {
+    let items = await Item.findAll()
+    res.json({ items })
+})
+
+//get random restaurant
+app.get("/randomrestaurant", async (req, res) => {
     let randInt = Math.ceil(Math.random()*3);
     let randResto = await Restaurant.findByPk(randInt)
-    let allItems = await Item.findAll();
-    response.json([randResto, allItems])
+    res.json({ randResto })
+})
+
+//get restaurant by id and associated menu and items
+app.get('/restaurants/:id', async (req, res) => {
+    //nested eager loading
+    let restaurant = await Restaurant.findByPk(req.params.id, { 
+        include: {
+        model: Menu,
+            include: {
+                model: Item
+            }
+        } 
+    });
+    //let restaurant = await Restaurant.findByPk(req.params.id, { include: Menu });
+	res.json({ restaurant })
+})
+
+//get menu by id and associated items
+app.get('/menus/:id', async (req, res) => {
+	let menu = await Menu.findByPk(req.params.id, { include: Item });
+	res.json({ menu })
+})
+
+//get item by id
+app.get('/items/:id', async (req, res) => {
+	let item = await Item.findByPk(req.params.id);
+	res.json({ item })
 })
 
 //Q: What will our server be doing?

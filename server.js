@@ -5,11 +5,14 @@ const {Restaurant, Menu, Item} = require('./models/index');
 const app = express();
 const port = 3000;
 
+// Add this boilerplate middleware to successfully use req.body
+app.use(express.json())
+
 //Q: What does express.static help us do?
 //A: Helps serve static files such as images, CSS, js files
 //Q: What do you think path.join helps us do?
 //A: path.join takes absolute path of current executing file and adds public to it so express can find our static files
-app.use(express.static(path.join(__dirname, 'public')))
+//app.use(express.static(path.join(__dirname, 'public')))
 
 //get all restaurants
 app.get("/restaurants", async (req, res) => {
@@ -61,6 +64,28 @@ app.get('/menus/:id', async (req, res) => {
 app.get('/items/:id', async (req, res) => {
 	let item = await Item.findByPk(req.params.id);
 	res.json({ item })
+})
+
+// Add new restaurant
+app.post('/restaurants', async (req, res) => {
+	let newRestaurant = await Restaurant.create(req.body);
+	res.send('Created!')
+})
+
+// Delete a restaurant
+app.delete('/restaurants/:id', async (req, res) => {
+	await Restaurant.destroy({
+		where : {id : req.params.id} // Destory a restaurant where this object matches
+	})
+	res.send("Deleted!!")
+})
+
+// Update a restaurant
+app.put("/restaurants/:id", async (req, res) => {
+	let updated = await Restaurant.update(req.body, {
+		where : {id : req.params.id} // Update a musician where the id matches, based on req.body
+	})
+	res.send("Updated!!")
 })
 
 //Q: What will our server be doing?
